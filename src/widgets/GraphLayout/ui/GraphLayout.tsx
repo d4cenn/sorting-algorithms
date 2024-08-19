@@ -8,60 +8,56 @@ interface GraphLayoutPropsType {
 }
 
 export const GraphLayout: FC<GraphLayoutPropsType> = ({ values }) => {
-    const [activeIndexes, setActiveIndexes] = useState<number[]>([])
     const [sortedValues, setSortedValues] = useState(values)
-    const [activeIndex, setActiveIndex] = useState(-1)
-    const [sortHistory, setSortHistory] = useState([[...sortedValues]])
-    const [playing, setPlaying] = useState(false)
-    const [loopingVar, setLoopingVar] = useState(0)
+    const [activeIndex, setActiveIndex] = useState<number>(0)
+    const [sortHistory, setSortHistory] = useState([{activeIndex: 0, currentValues: [...sortedValues]}])
+    const [playing, setPlaying] = useState<boolean>(false)
+    const [loopIndex, setLoopIndex] = useState<number>(0)
     const timeoutRef: any = useRef()
     const size = values.length
 
     useEffect(() => {
-        setSortedValues(sortHistory[loopingVar])
-        console.log(activeIndexes)
-        setActiveIndex(activeIndexes[loopingVar])
-    }, [loopingVar, sortHistory]);
+        setSortedValues(sortHistory[loopIndex].currentValues)
+        setActiveIndex(sortHistory[loopIndex].activeIndex)
+    }, [loopIndex, sortHistory]);
 
     useEffect(() => {
-        if (loopingVar < sortHistory.length - 1 && playing) {
+        if (loopIndex < sortHistory.length - 1 && playing) {
             clearTimeout(timeoutRef.current)
             timeoutRef.current = setTimeout(() => {
-                setLoopingVar(loopingVar + 1)
-            }, 30)
+                setLoopIndex(loopIndex + 1)
+            }, 5)
         } else {
             setPlaying(false)
         }
-    }, [loopingVar, playing])
+    }, [loopIndex, playing, sortHistory])
 
     const play = () => {
         setPlaying(true);
     };
 
     const bubbleSort = () => {
-        var historyArray = [[...sortedValues]];
+        const historyArray = [{activeIndex: 0, currentValues:[...sortedValues]}]
         for (let i = 0; i < size - 1; i++) {
             for (let j = 0; j < size - i - 1; j++) {
                 if (sortedValues[j] > sortedValues[j + 1]) {
-                    activeIndexes.push(j)
-                    var swap = sortedValues[j];
-                    sortedValues[j] = sortedValues[j + 1];
-                    sortedValues[j + 1] = swap;
-                    historyArray.push([...sortedValues]);
+                    const swap = sortedValues[j]
+                    sortedValues[j] = sortedValues[j + 1]
+                    sortedValues[j + 1] = swap
+                    historyArray.push({activeIndex: j + 1, currentValues:[...sortedValues]})
                 }
             }
         }
-        setActiveIndexes(activeIndexes)
         setSortHistory(historyArray);
         play();
     };
 
     return (
         <>
-        <div className={styles.GraphLayout}>
-            {sortedValues.map((value, index) => <GraphBlock isActive={activeIndex === index} key={index} height={value} />)}
-        </div>
-        <Button onClick={() => setTimeout(() => bubbleSort(), 500)} />
+            <div className={styles.GraphLayout}>
+                {sortedValues.map((value, index) => <GraphBlock isActive={activeIndex === index} key={index} height={value} />)}
+            </div>
+            <Button onClick={bubbleSort}>Start sorting</Button>
         </>
     )
 }
