@@ -1,19 +1,20 @@
 import styles from './GraphLayout.module.scss'
-import {FC, useCallback, useEffect, useRef, useState} from "react";
+import {Dispatch, FC, SetStateAction, useCallback, useEffect, useRef, useState} from "react";
 import {GraphBlock} from "../../../entities/GraphBlock/ui/GraphBlock";
 import {Button} from "../../../shared/ui/Button/Button";
 import {SORTING_ALGORITHMS} from "../../../shared/lib/common/consts";
 
 interface GraphLayoutPropsType {
     activeAlgorithm: SORTING_ALGORITHMS
+    isAlgorithmRunning: boolean
+    setIsAlgorithmRunning: Dispatch<SetStateAction<boolean>>
     values: number[]
 }
 
-export const GraphLayout: FC<GraphLayoutPropsType> = ({ activeAlgorithm, values }) => {
+export const GraphLayout: FC<GraphLayoutPropsType> = ({ activeAlgorithm, isAlgorithmRunning, setIsAlgorithmRunning, values }) => {
     const [sortedValues, setSortedValues] = useState(values)
     const [activeIndex, setActiveIndex] = useState<number>(0)
     const [sortHistory, setSortHistory] = useState([{activeIndex: 0, currentValues: [...sortedValues]}])
-    const [isDisabled, setIsDisabled] = useState<boolean>(false)
     const [playing, setPlaying] = useState<boolean>(false)
     const [loopIndex, setLoopIndex] = useState<number>(0)
     const timeoutRef: any = useRef()
@@ -55,7 +56,6 @@ export const GraphLayout: FC<GraphLayoutPropsType> = ({ activeAlgorithm, values 
         }
         setSortHistory(historyArray)
         setPlaying(true)
-        setIsDisabled(true)
     }
 
     const selectionSort = () => {
@@ -76,7 +76,6 @@ export const GraphLayout: FC<GraphLayoutPropsType> = ({ activeAlgorithm, values 
 
         setSortHistory(historyArray)
         setPlaying(true)
-        setIsDisabled(true)
     }
 
     const executeActiveAlgorithm = () => {
@@ -91,20 +90,16 @@ export const GraphLayout: FC<GraphLayoutPropsType> = ({ activeAlgorithm, values 
     }
 
     const handleStartSorting = useCallback(() => {
-        if (isDisabled) {
-            return null
-        }
-
+        setIsAlgorithmRunning(true)
         executeActiveAlgorithm()
-        setIsDisabled(false)
-    }, [executeActiveAlgorithm, isDisabled])
+    }, [executeActiveAlgorithm, setIsAlgorithmRunning])
 
     return (
         <>
             <div className={styles.GraphLayout}>
                 {sortedValues.map((value, index) => <GraphBlock isActive={activeIndex === index} key={index} height={value} />)}
             </div>
-            <Button onClick={handleStartSorting}>Start sorting</Button>
+            <Button isDisabled={playing} onClick={handleStartSorting}>Start sorting</Button>
         </>
     )
 }

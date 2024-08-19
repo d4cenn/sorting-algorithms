@@ -16,12 +16,13 @@ const createValues = () => {
 
 function App() {
     const [activeAlgorithm, setActiveAlgorithm] = useState<SORTING_ALGORITHMS>(SORTING_ALGORITHMS.BUBBLE)
+    const [isAlgorithmRunning, setIsAlgorithmRunning] = useState<boolean>(false)
     const values = createValues()
 
     return (
         <div className="App">
             <Header setActiveAlgorithm={setActiveAlgorithm} />
-            <GraphLayout activeAlgorithm={activeAlgorithm} values={values} />
+            <GraphLayout activeAlgorithm={activeAlgorithm} isAlgorithmRunning={isAlgorithmRunning} setIsAlgorithmRunning={setIsAlgorithmRunning} values={values} />
         </div>
     );
 }
