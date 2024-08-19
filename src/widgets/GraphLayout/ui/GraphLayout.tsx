@@ -1,13 +1,15 @@
 import styles from './GraphLayout.module.scss'
-import {FC, useEffect, useRef, useState} from "react";
+import {FC, useCallback, useEffect, useRef, useState} from "react";
 import {GraphBlock} from "../../../entities/GraphBlock/ui/GraphBlock";
 import {Button} from "../../../shared/ui/Button/Button";
+import {SORTING_ALGORITHMS} from "../../../shared/lib/common/consts";
 
 interface GraphLayoutPropsType {
+    activeAlgorithm: SORTING_ALGORITHMS
     values: number[]
 }
 
-export const GraphLayout: FC<GraphLayoutPropsType> = ({ values }) => {
+export const GraphLayout: FC<GraphLayoutPropsType> = ({ activeAlgorithm, values }) => {
     const [sortedValues, setSortedValues] = useState(values)
     const [activeIndex, setActiveIndex] = useState<number>(0)
     const [sortHistory, setSortHistory] = useState([{activeIndex: 0, currentValues: [...sortedValues]}])
@@ -16,6 +18,12 @@ export const GraphLayout: FC<GraphLayoutPropsType> = ({ values }) => {
     const [loopIndex, setLoopIndex] = useState<number>(0)
     const timeoutRef: any = useRef()
     const size = values.length
+
+    useEffect(() => {
+        setSortedValues(values)
+        setLoopIndex(0)
+        setActiveIndex(0)
+    }, [activeAlgorithm, values])
 
     useEffect(() => {
         setSortedValues(sortHistory[loopIndex].currentValues)
@@ -48,14 +56,55 @@ export const GraphLayout: FC<GraphLayoutPropsType> = ({ values }) => {
         setSortHistory(historyArray)
         setPlaying(true)
         setIsDisabled(true)
-    };
+    }
+
+    const selectionSort = () => {
+        const historyArray = [{activeIndex: 0, currentValues:[...sortedValues]}]
+        for (let i = 0; i < size - 1; i++) {
+            let minValueIndex = i;
+            for (let j = i + 1; j < size; j++) {
+                if (sortedValues[j] < sortedValues[minValueIndex]) {
+                    minValueIndex = j;
+                }
+            }
+
+            let temp = sortedValues[minValueIndex];
+            sortedValues[minValueIndex] = sortedValues[i];
+            sortedValues[i] = temp;
+            historyArray.push({activeIndex: i, currentValues:[...sortedValues]})
+        }
+
+        setSortHistory(historyArray)
+        setPlaying(true)
+        setIsDisabled(true)
+    }
+
+    const executeActiveAlgorithm = () => {
+        switch (activeAlgorithm) {
+            case SORTING_ALGORITHMS.BUBBLE:
+                return bubbleSort()
+            case SORTING_ALGORITHMS.SELECTION:
+                return selectionSort()
+            default:
+                return null
+        }
+    }
+
+    const handleStartSorting = useCallback(() => {
+        if (isDisabled) {
+            return null
+        }
+
+        executeActiveAlgorithm()
+        setIsDisabled(false)
+    }, [executeActiveAlgorithm, isDisabled])
 
     return (
         <>
             <div className={styles.GraphLayout}>
                 {sortedValues.map((value, index) => <GraphBlock isActive={activeIndex === index} key={index} height={value} />)}
             </div>
-            <Button onClick={() => !isDisabled ? bubbleSort() : null}>Start sorting</Button>
+            <Button onClick={handleStartSorting}>Start sorting</Button>
         </>
     )
 }

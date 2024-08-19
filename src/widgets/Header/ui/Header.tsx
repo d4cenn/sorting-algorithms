@@ -1,13 +1,19 @@
 import {Button} from "../../../shared/ui/Button/Button";
-import React from "react";
+import React, {Dispatch, FC, SetStateAction} from "react";
+import {AllSortingAlgorithms, SORTING_ALGORITHMS} from "../../../shared/lib/common/consts";
+import styles from './Header.module.scss'
 
-const sortingAlgorithms = ['Bubble']
+interface HeaderPropsType {
+    setActiveAlgorithm: Dispatch<SetStateAction<SORTING_ALGORITHMS>>
+}
 
-export const Header = () => {
+export const Header: FC<HeaderPropsType> = ({ setActiveAlgorithm}) => {
     return (
         <div>
             <p>Pick your desired algorithm</p>
-            {sortingAlgorithms.map((algo, index) => <Button key={index} onClick={() => console.log(algo)}>{algo}</Button>)}
+            <div className={styles.HeaderButtons}>
+            {AllSortingAlgorithms.map((algorithm, index) => <Button key={index} onClick={() => setActiveAlgorithm(algorithm)}>{algorithm}</Button>)}
+            </div>
         </div>
     )
 }
