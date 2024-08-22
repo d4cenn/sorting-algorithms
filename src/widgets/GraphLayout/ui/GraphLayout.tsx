@@ -16,15 +16,19 @@ export const GraphLayout: FC<GraphLayoutPropsType> = ({ activeAlgorithm, isAlgor
     const [activeIndex, setActiveIndex] = useState<number>(0)
     const [sortHistory, setSortHistory] = useState([{activeIndex: 0, currentValues: [...sortedValues]}])
     const [playing, setPlaying] = useState<boolean>(false)
+    const [isDisabled, setIsDisabled] = useState<boolean>(false)
     const [loopIndex, setLoopIndex] = useState<number>(0)
     const timeoutRef: any = useRef()
     const size = values.length
 
     useEffect(() => {
+        clearTimeout(timeoutRef.current)
+        setPlaying(false)
+        setIsDisabled(false)
         setSortedValues(values)
         setLoopIndex(0)
-        setActiveIndex(0)
-    }, [activeAlgorithm, values])
+        setSortHistory([{activeIndex: 0, currentValues: [...values]}])
+    }, [values])
 
     useEffect(() => {
         setSortedValues(sortHistory[loopIndex].currentValues)
@@ -35,6 +39,7 @@ export const GraphLayout: FC<GraphLayoutPropsType> = ({ activeAlgorithm, isAlgor
         if (loopIndex < sortHistory.length - 1 && playing) {
             clearTimeout(timeoutRef.current)
             timeoutRef.current = setTimeout(() => {
+                console.log(loopIndex)
                 setLoopIndex(loopIndex + 1)
             }, 5)
         } else {
@@ -90,16 +95,16 @@ export const GraphLayout: FC<GraphLayoutPropsType> = ({ activeAlgorithm, isAlgor
     }
 
     const handleStartSorting = useCallback(() => {
-        setIsAlgorithmRunning(true)
+        setIsDisabled(true)
         executeActiveAlgorithm()
-    }, [executeActiveAlgorithm, setIsAlgorithmRunning])
+    }, [executeActiveAlgorithm])
 
     return (
         <>
             <div className={styles.GraphLayout}>
                 {sortedValues.map((value, index) => <GraphBlock isActive={activeIndex === index} key={index} height={value} />)}
             </div>
-            <Button isDisabled={playing} onClick={handleStartSorting}>Start sorting</Button>
+            <Button isDisabled={playing || isDisabled} onClick={handleStartSorting}>Start sorting</Button>
         </>
     )
 }
