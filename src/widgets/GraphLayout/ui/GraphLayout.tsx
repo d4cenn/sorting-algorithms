@@ -41,7 +41,7 @@ export const GraphLayout: FC<GraphLayoutPropsType> = ({ activeAlgorithm, isAlgor
             timeoutRef.current = setTimeout(() => {
                 console.log(loopIndex)
                 setLoopIndex(loopIndex + 1)
-            }, 5)
+            }, 20)
         } else {
             setPlaying(false)
         }
@@ -76,7 +76,7 @@ export const GraphLayout: FC<GraphLayoutPropsType> = ({ activeAlgorithm, isAlgor
             let temp = sortedValues[minValueIndex];
             sortedValues[minValueIndex] = sortedValues[i];
             sortedValues[i] = temp;
-            historyArray.push({activeIndex: i, currentValues:[...sortedValues]})
+            historyArray.push({activeIndex: minValueIndex, currentValues:[...sortedValues]})
         }
 
         setSortHistory(historyArray)
