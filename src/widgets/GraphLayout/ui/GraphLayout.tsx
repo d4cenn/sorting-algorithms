@@ -39,7 +39,6 @@ export const GraphLayout: FC<GraphLayoutPropsType> = ({ activeAlgorithm, isAlgor
         if (loopIndex < sortHistory.length - 1 && playing) {
             clearTimeout(timeoutRef.current)
             timeoutRef.current = setTimeout(() => {
-                console.log(loopIndex)
                 setLoopIndex(loopIndex + 1)
             }, 20)
         } else {
